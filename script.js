@@ -1,12 +1,45 @@
 const terminalBody = document.getElementById('terminal__body');
 
+let currentUser = "root"
+let homeDirectory;
+
+if (currentUser == "root"){
+    homeDirectory = "/root"
+
+}
+else{
+    homeDirectory = `/home/${currentUser}`;
+}
+
+let currentDirectory = homeDirectory;
+
+const fileManager = {
+    "/":{
+        home: {
+            guest: {
+                Desktop: {
+
+                },
+                Documents: {
+
+                },
+                Downloads: {
+
+                }
+            }
+        },
+
+        root: {},
+    }
+}
+
 
 function createPrompt(){
     const prompt = document.createElement('div');
     prompt.id = 'terminal__prompt';
     prompt.innerHTML = `
-        <span id="terminal__prompt--user">root@ubuntu:</span>
-        <span id="terminal__prompt--location">~</span>
+        <span id="terminal__prompt--user">${currentUser}@ubuntu:</span>
+        <span id="terminal__prompt--location">${currentDirectory == homeDirectory ? "~" : currentDirectory}</span> <!--If the currentDirectory is homeDirectory the console outputs ~-->
         <span id="terminal__prompt--bling">$</span>
         <input type="text" id="terminal__input" autofocus>
         
@@ -31,11 +64,11 @@ function createPrompt(){
             
             switch(commandText.toLowerCase()){
                 case "whoami":
-                    let user = prompt.querySelector('#terminal__prompt--user').textContent;
-                    let endIndex = user.indexOf("@");
-                    user = user.slice(0, endIndex);
-                    output.textContent = user;
+                    output.textContent = currentUser;
                     break;
+
+                
+
 
                 default:
                     output.textContent = commandText;
