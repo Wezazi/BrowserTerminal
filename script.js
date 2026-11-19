@@ -21,6 +21,8 @@ const fileManager = {
 
                 },
                 Documents: {
+                    "file.txt" : "Hello this is a normal text file",
+                    "fruits.txt": "My favorite fruits are apples and oranges" 
 
                 },
                 Downloads: {
@@ -32,6 +34,31 @@ const fileManager = {
         root: {},
     }
 }
+
+
+function traverseDirectory(path){
+    /* 
+    Test this code, you will notice that it returns an empty string, that's why i'm gonna filter out empty string in my code below:
+    const path = "/home/guest/Documents";
+    const directories = path.split("/");
+    console.log(directories);
+    */
+
+    // Split the path into directory names
+    const directories = path.split("/").filter(Boolean); //.filter(Boolean) removes empty strings from the results
+
+    
+    let directory = fileManager["/"]; // Start at the root directory
+
+    /*The value in directories have index based on how many nesting layers they are, e.g. index 0 is a folder directly after / while index 1 is one extra folder away*/
+    for(let folder of directories){
+        directory = directory[folder]
+    }
+    return directory;
+
+}
+console.log(traverseDirectory("/home/guest/Documents"));
+
 
 
 function createPrompt(){
