@@ -201,7 +201,28 @@ function createPrompt(){
                     break
 
                 case "cat":
-                    console.log("hello");
+                    if(commandParts[1]){
+                        if (commandParts[1].startsWith("/")){
+                            run = traverseAbsolute(commandParts[1], "cat");
+
+                        }
+                        else{
+                            run = traverseRelative(commandParts[1], "cat");
+                        }
+
+                        if (typeof(run) == "string"){
+                            output.textContent = run;
+                        }
+                        else{
+
+                            output.textContent = `${commandParts[1]} Is a directory`;
+                        }
+
+                    }
+                    else{
+                        output.textContent = "No such file or directory";
+                    }
+                    break;
 
 
                 default:
