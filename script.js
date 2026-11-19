@@ -1,6 +1,6 @@
 const terminalBody = document.getElementById('terminal__body');
 
-let currentUser = "root"
+let currentUser = "guest"
 let homeDirectory;
 
 if (currentUser == "root"){
@@ -48,47 +48,34 @@ function traverseAbsolute(path){
     for(let folder of directories){
         directory = directory[folder]
     }
-    return(directory)
-    //currentDirectory = directory;
 
+    currentDirectory = path;
+    return(directory) //returns object
+    
 }
-console.log(traverseAbsolute("/home/guest"));
+//console.log(traverseAbsolute("/home/guest"));
 
 function traverseRelative(path){
-
-    switch (path){
-        case "..":{
-            let directories = currentDirectory.split("/").filter(Boolean);
-            directories.pop()
-            let directory = fileManager["/"];
-
-            for(let folder of directories){
-                directory = directory[folder]
-            }
-            currentDirectory = directory;
-            return directory;
-
-        } //Wrapping each case with {} creates a seperate scope, without the curly brackets i got an error because i defined directories in both cases
-        default:{
-            if (path.startsWith("./")){
-                path = path.split("./").filter(Boolean)[0]
-            }
-            
-            let directories = currentDirectory.split("/").filter(Boolean);
-            directories.push(path);
-            let directory = fileManager["/"];
-
-            for(let folder of directories){
-                directory = directory[folder]
-            }
-            
-
+    if (path == ".."){
+        let directories = currentDirectory.split("/").filter(Boolean);
+        directories.pop()
+        let absolutePath = "/" + directories.join("/");
+        return(traverseAbsolute(absolutePath));
+    }
+    else{
+        if (path.startsWith("./")){
+            path = path.split("./").filter(Boolean)[0]
         }
 
+        let directories = currentDirectory.split("/").filter(Boolean);
+        directories.push(path);
+        let absolutePath = "/" + directories.join("/");
+        return(traverseAbsolute(absolutePath));
+
     }
+    
 }
-
-
+//console.log(traverseRelative(".."));
 
 
 function createPrompt(){
