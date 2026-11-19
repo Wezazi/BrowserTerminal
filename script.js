@@ -1,33 +1,41 @@
 const terminalBody = document.getElementById('terminal__body');
 
 
-const prompt = document.createElement('div');
-prompt.id = 'terminal__prompt';
-prompt.innerHTML = `
-    <span id="terminal__prompt--user">fobabs@ubuntu:</span>
-    <span id="terminal__prompt--location">~</span>
-    <span id="terminal__prompt--bling">$</span>
-    <input type="text" id="terminal__input" autofocus>
-    
-`;
-terminalBody.appendChild(prompt);
-//The reason we add the terminal prompt through js instead of writing the html above to index.html is because everytime we write a command and get a output, we want the terminal prompt to appear after the output.
+function createPrompt(){
+    const prompt = document.createElement('div');
+    prompt.id = 'terminal__prompt';
+    prompt.innerHTML = `
+        <span id="terminal__prompt--user">fobabs@ubuntu:</span>
+        <span id="terminal__prompt--location">~</span>
+        <span id="terminal__prompt--bling">$</span>
+        <input type="text" id="terminal__input" autofocus>
+        
+    `;
+    terminalBody.appendChild(prompt);
+
+    const terminalInput = prompt.querySelector('#terminal__input'); //we use prompt.querySelector instead of document.getElementById so that search inside the prompt that we created instead of the whole document
+    terminalInput.focus(); //<input type="text" id="terminal__input" autofocus> will only autofocus the first input, terminalInput.focus() solves this problem
+
+    terminalInput.addEventListener('keydown', function(event) {
+        if (event.key == 'Enter') {
+
+            //Creates span with containing texcontent of the input value, the span then replaces the input so that the user can't type anything else
+            const commandText = terminalInput.value;
+            const command = document.createElement('span')
+            command.textContent = commandText;
+            terminalInput.replaceWith(command);
 
 
+            //Creates a div (which will appear in a new line) and adds it to the dom. The div has textcontent of the input value
+            const output = document.createElement('div');
+            output.textContent = commandText;
+            terminalBody.appendChild(output);
 
-//Now that the input with id terminal__input has been added to the dom. we can get it by ID:
-const terminalInput = document.getElementById('terminal__input');
+            //calls the function again
+            createPrompt();
 
-//Triggers when user presses a key inside the terminal input
-terminalInput.addEventListener('keydown', function(event) {
+        }
+    });
+}
 
-    //If the pressed key is enter, a new div element is gonna get created with the textcontent of the input value and added to the terminal div. the value is then removed from the input
-    if (event.key == 'Enter') {
-        const command = terminalInput.value;
-        const output = document.createElement('div');
-        output.textContent = command;
-
-        terminalBody.appendChild(output);
-        terminalInput.value = '';
-    }
-});
+createPrompt();
