@@ -36,7 +36,7 @@ const fileManager = {
 }
 
 
-function traverseAbsolute(path){
+function traverseAbsolute(path, command = "cmd"){
     
     // Split the path into directory names
     let directories = path.split("/").filter(Boolean); //.filter(Boolean) removes empty strings from the results
@@ -48,10 +48,15 @@ function traverseAbsolute(path){
     for(let folder of directories){
         directory = directory[folder]
     }
-
+    
     if (directory){
-        currentDirectory = path;
-        return(directory) //returns object
+        if (command == "cmd"){
+            currentDirectory = path;
+            return(directory) //returns object
+        }
+        else{
+            return(directory) //returns object
+        }
     }
     else{
         return "no such file or directory";
@@ -62,27 +67,35 @@ function traverseAbsolute(path){
 }
 //console.log(traverseAbsolute("/home/guest"));
 
-function traverseRelative(path){
-    let directories;
-    let absolutePath;
 
-    if (path == ".."){
-        directories = currentDirectory.split("/").filter(Boolean);
-        directories.pop()
-        absolutePath = "/" + directories.join("/");
-        return(traverseAbsolute(absolutePath));
+function traverseRelative(path, command = "cmd"){
+    
+    let directories = currentDirectory.split("/").filter(Boolean);
+
+    let pathParts = path.split("/").filter(Boolean);
+
+    for (let folder of pathParts){
+
+        if (folder == ".."){
+            directories.pop();
+        }
+        else if (folder == "."){
+            continue;
+        }
+        else{
+            directories.push(folder);
+        }
+    }
+
+    let absolutePath = "/" + directories.join("/");
+    if (command == "cmd"){
+        return traverseAbsolute(absolutePath);
     }
     else{
-        if (path.startsWith("./")){
-            path = path.split("./").filter(Boolean)[0]
-        }
-
-        directories = currentDirectory.split("/").filter(Boolean);
-        directories.push(path);
-        absolutePath = "/" + directories.join("/");
-        return(traverseAbsolute(absolutePath));
-
+        return traverseAbsolute(absolutePath, command);
     }
+
+    
     
 }
 //console.log(JSON.stringify(traverseRelative("..")));
@@ -131,7 +144,7 @@ function createPrompt(){
             const output = document.createElement('div');
 
             const commandParts = commandText.trim().split(" ");
-            
+            let run;
             switch(commandParts[0].toLowerCase()){
                 case "whoami":
                     output.textContent = currentUser;
@@ -142,7 +155,6 @@ function createPrompt(){
                     break;
 
                 case "cd":
-                    let run;
                     
                     if(commandParts[1]){
                         if (commandParts[1].startsWith("/")){
@@ -151,6 +163,7 @@ function createPrompt(){
                         else{
                             run = traverseRelative(commandParts[1]);
                         }
+
                         if (typeof(run) == "string"){
                             output.textContent = run;
                         }
@@ -163,6 +176,33 @@ function createPrompt(){
                     }
 
                     break;
+
+                case "ls":
+                    if(commandParts[1]){
+                        if (commandParts[1].startsWith("/")){
+                            run = traverseAbsolute(commandParts[1], "ls");
+                        }
+                        else{
+                            run = traverseRelative(commandParts[1], "ls");
+                        }
+
+                        if (typeof(run) == "string"){
+                            output.textContent = run;
+                        }
+                        else{
+                            output.textContent = Object.keys(run).join("  ");
+                            
+                        }
+                    }
+                    else{
+                        run = traverseAbsolute(currentDirectory, "ls");
+                        output.textContent = Object.keys(run).join("  ");
+                    }
+                    break
+
+                case "cat":
+                    console.log("hello");
+
 
                 default:
                     if (commandText){
