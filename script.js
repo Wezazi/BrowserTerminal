@@ -36,28 +36,58 @@ const fileManager = {
 }
 
 
-function traverseDirectory(path){
-    /* 
-    Test this code, you will notice that it returns an empty string, that's why i'm gonna filter out empty string in my code below:
-    const path = "/home/guest/Documents";
-    const directories = path.split("/");
-    console.log(directories);
-    */
-
+function traverseAbsolute(path){
+    
     // Split the path into directory names
-    const directories = path.split("/").filter(Boolean); //.filter(Boolean) removes empty strings from the results
+    let directories = path.split("/").filter(Boolean); //.filter(Boolean) removes empty strings from the results
 
     
-    let directory = fileManager["/"]; // Start at the root directory
+    let directory = fileManager["/"]; 
 
     /*The value in directories have index based on how many nesting layers they are, e.g. index 0 is a folder directly after / while index 1 is one extra folder away*/
     for(let folder of directories){
         directory = directory[folder]
     }
-    return directory;
+    return(directory)
+    //currentDirectory = directory;
 
 }
-console.log(traverseDirectory("/home/guest/Documents"));
+console.log(traverseAbsolute("/home/guest"));
+
+function traverseRelative(path){
+
+    switch (path){
+        case "..":{
+            let directories = currentDirectory.split("/").filter(Boolean);
+            directories.pop()
+            let directory = fileManager["/"];
+
+            for(let folder of directories){
+                directory = directory[folder]
+            }
+            currentDirectory = directory;
+            return directory;
+
+        } //Wrapping each case with {} creates a seperate scope, without the curly brackets i got an error because i defined directories in both cases
+        default:{
+            if (path.startsWith("./")){
+                path = path.split("./").filter(Boolean)[0]
+            }
+            
+            let directories = currentDirectory.split("/").filter(Boolean);
+            directories.push(path);
+            let directory = fileManager["/"];
+
+            for(let folder of directories){
+                directory = directory[folder]
+            }
+            
+
+        }
+
+    }
+}
+
 
 
 
@@ -88,13 +118,26 @@ function createPrompt(){
             
             //Creates a div and creates an if statement to decide what its texcontent should be before adding it to the dom
             const output = document.createElement('div');
+
+            const commandParts = commandText.trim().split(" ");
             
-            switch(commandText.toLowerCase()){
+            switch(commandParts[0].toLowerCase()){
                 case "whoami":
                     output.textContent = currentUser;
                     break;
 
-                
+                case "pwd":
+                    output.textContent = currentDirectory;
+                    break;
+
+                case "cd":
+                    if (commandParts[1].startsWith("/")){
+                        traverseAbsolute(commandParts[1]);
+                    }
+                    else{
+                        traverseRelative(commandParts[1]);
+                    }
+
 
 
                 default:
