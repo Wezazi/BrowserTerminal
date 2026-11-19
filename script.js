@@ -49,17 +49,27 @@ function traverseAbsolute(path){
         directory = directory[folder]
     }
 
-    currentDirectory = path;
-    return(directory) //returns object
+    if (directory){
+        currentDirectory = path;
+        return(directory) //returns object
+    }
+    else{
+        return "no such file or directory";
+    }
+
+    
     
 }
 //console.log(traverseAbsolute("/home/guest"));
 
 function traverseRelative(path){
+    let directories;
+    let absolutePath;
+
     if (path == ".."){
-        let directories = currentDirectory.split("/").filter(Boolean);
+        directories = currentDirectory.split("/").filter(Boolean);
         directories.pop()
-        let absolutePath = "/" + directories.join("/");
+        absolutePath = "/" + directories.join("/");
         return(traverseAbsolute(absolutePath));
     }
     else{
@@ -67,15 +77,29 @@ function traverseRelative(path){
             path = path.split("./").filter(Boolean)[0]
         }
 
-        let directories = currentDirectory.split("/").filter(Boolean);
+        directories = currentDirectory.split("/").filter(Boolean);
         directories.push(path);
-        let absolutePath = "/" + directories.join("/");
+        absolutePath = "/" + directories.join("/");
         return(traverseAbsolute(absolutePath));
 
     }
     
 }
-//console.log(traverseRelative(".."));
+//console.log(JSON.stringify(traverseRelative("..")));
+//console.log(traverseRelative("guest"));
+
+//Prevents the content inside the terminalbody from overflowing, when the body is full, the oldest prompt + output gets overwritten by the second oldest pair
+function preventOverflow() {
+    while (terminalBody.scrollHeight > terminalBody.clientHeight) {
+        const firstPrompt = terminalBody.firstElementChild;
+        if (!firstPrompt) break;
+
+        const output = firstPrompt.nextElementSibling;
+
+        firstPrompt.remove();
+        if (output) output.remove();
+    }
+}
 
 
 function createPrompt(){
@@ -83,7 +107,7 @@ function createPrompt(){
     prompt.id = 'terminal__prompt';
     prompt.innerHTML = `
         <span id="terminal__prompt--user">${currentUser}@ubuntu:</span>
-        <span id="terminal__prompt--location">${currentDirectory == homeDirectory ? "~" : currentDirectory}</span> <!--If the currentDirectory is homeDirectory the console outputs ~-->
+        <span id="terminal__prompt--location">${currentDirectory.startsWith(homeDirectory) ? currentDirectory.replace(homeDirectory, "~") : currentDirectory}</span> <!--If the currentDirectory is homeDirectory the console outputs ~-->
         <span id="terminal__prompt--bling">$</span>
         <input type="text" id="terminal__input" autofocus>
         
@@ -118,23 +142,43 @@ function createPrompt(){
                     break;
 
                 case "cd":
-                    if (commandParts[1].startsWith("/")){
-                        traverseAbsolute(commandParts[1]);
+                    let run;
+                    
+                    if(commandParts[1]){
+                        if (commandParts[1].startsWith("/")){
+                            run = traverseAbsolute(commandParts[1]);
+                        }
+                        else{
+                            run = traverseRelative(commandParts[1]);
+                        }
+                        if (typeof(run) == "string"){
+                            output.textContent = run;
+                        }
+                        else{
+                            output.textContent = "\u00A0";
+                        }
                     }
                     else{
-                        traverseRelative(commandParts[1]);
+                        output.textContent = "\u00A0";
                     }
 
-
+                    break;
 
                 default:
-                    output.textContent = commandText;
+                    if (commandText){
+                        output.textContent = "command not found";
+                    }
+                    else{
+                        output.textContent = "\u00A0";
+                    }
+                  
                     break;
             };
             terminalBody.appendChild(output);
+            
 
             createPrompt(); //Creating the new prompt will make a new terminal_prompt and append it to the body which will make it appear after the previous command output
-
+            preventOverflow();
         }
     });
 }
