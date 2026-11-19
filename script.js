@@ -224,6 +224,20 @@ function createPrompt(){
                     }
                     break;
 
+                case "clear":
+                    terminalBody.innerHTML = "";
+                    break;
+
+                case "help":
+                    output.innerHTML = `
+                        whoami: print effective user name<br>
+                        pwd: print name of current/working directory<br>
+                        cd: change the working directory<br>
+                        ls: list directory contents<br>
+                        cat: display file contents<br>
+                        clear: clear the terminal screen
+                    `;
+                    break;
 
                 default:
                     if (commandText){
