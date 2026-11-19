@@ -5,7 +5,7 @@ function createPrompt(){
     const prompt = document.createElement('div');
     prompt.id = 'terminal__prompt';
     prompt.innerHTML = `
-        <span id="terminal__prompt--user">fobabs@ubuntu:</span>
+        <span id="terminal__prompt--user">root@ubuntu:</span>
         <span id="terminal__prompt--location">~</span>
         <span id="terminal__prompt--bling">$</span>
         <input type="text" id="terminal__input" autofocus>
@@ -25,14 +25,25 @@ function createPrompt(){
             command.textContent = commandText;
             terminalInput.replaceWith(command);
 
-
-            //Creates a div (which will appear in a new line) and adds it to the dom. The div has textcontent of the input value
+            
+            //Creates a div and creates an if statement to decide what its texcontent should be before adding it to the dom
             const output = document.createElement('div');
-            output.textContent = commandText;
+            
+            switch(commandText.toLowerCase()){
+                case "whoami":
+                    let user = prompt.querySelector('#terminal__prompt--user').textContent;
+                    let endIndex = user.indexOf("@");
+                    user = user.slice(0, endIndex);
+                    output.textContent = user;
+                    break;
+
+                default:
+                    output.textContent = commandText;
+                    break;
+            };
             terminalBody.appendChild(output);
 
-            //calls the function again
-            createPrompt();
+            createPrompt(); //Creating the new prompt will make a new terminal_prompt and append it to the body which will make it appear after the previous command output
 
         }
     });
